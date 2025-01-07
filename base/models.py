@@ -82,7 +82,7 @@ class Place(models.Model):
     class Meta:
         verbose_name = _('Place')
         verbose_name_plural = _('Places')
-        ordering = ['name']
+        ordering = ['created_at']
 
     def __str__(self):
         return self.user.name if self.user else self.address
