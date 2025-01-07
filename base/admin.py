@@ -16,7 +16,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'description')
+            'fields': ('name',)
         }),
         (_('SEO'), {
             'fields': ('slug',)
