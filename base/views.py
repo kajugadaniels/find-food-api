@@ -31,3 +31,23 @@ class getCategories(generics.ListAPIView):
             'data': serializer.data
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+class addCategory(generics.CreateAPIView):
+    """
+    API view to create a new category.
+    """
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create method to return a custom success message on category creation.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        response_data = {
+            'message': 'Category created successfully.',
+            'data': serializer.data
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
