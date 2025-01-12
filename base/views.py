@@ -71,3 +71,26 @@ class showCategory(generics.RetrieveAPIView):
             'data': serializer.data
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+class editCategory(generics.UpdateAPIView):
+    """
+    API view to update an existing category by its slug.
+    """
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+    queryset = Category.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        """
+        Override update method to return a custom success message.
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        response_data = {
+            'message': 'Category updated successfully.',
+            'data': serializer.data
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
