@@ -180,3 +180,31 @@ class addPlace(generics.CreateAPIView):
             'data': serializer.data
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+class showPlace(generics.RetrieveAPIView):
+    """
+    API view to retrieve a single place by the slug of its associated User.
+    """
+    serializer_class = PlaceSerializer
+    lookup_field = 'user__slug'
+    queryset = Place.objects.all()
+
+    def get_object(self):
+        """
+        Retrieve a Place instance based on the slug of its associated user.
+        """
+        slug = self.kwargs.get('slug')
+        obj = get_object_or_404(Place, user__slug=slug)
+        return obj
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Override retrieve method to return a custom success message.
+        """
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        response_data = {
+            'message': 'Place retrieved successfully.',
+            'data': serializer.data
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
