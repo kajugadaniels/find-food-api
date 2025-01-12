@@ -1,10 +1,11 @@
 from base.models import *
 from base.serializers import *
 from django.db.models import Q
-from rest_framework import generics, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
+from rest_framework import generics, permissions, status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class getCategories(generics.ListAPIView):
     """
@@ -12,6 +13,7 @@ class getCategories(generics.ListAPIView):
     Supports optional filtering by passing a query parameter 'name' (case-insensitive partial match).
     """
     serializer_class = CategorySerializer
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         queryset = Category.objects.all()
@@ -38,6 +40,7 @@ class addCategory(generics.CreateAPIView):
     """
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
+    permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
         """
@@ -59,6 +62,7 @@ class showCategory(generics.RetrieveAPIView):
     serializer_class = CategorySerializer
     lookup_field = 'slug'
     queryset = Category.objects.all()
+    permission_classes = [permissions.AllowAny]
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -79,6 +83,7 @@ class editCategory(generics.UpdateAPIView):
     serializer_class = CategorySerializer
     lookup_field = 'slug'
     queryset = Category.objects.all()
+    permission_classes = [permissions.AllowAny]
 
     def update(self, request, *args, **kwargs):
         """
@@ -102,6 +107,7 @@ class deleteCategory(generics.DestroyAPIView):
     serializer_class = CategorySerializer
     lookup_field = 'slug'
     queryset = Category.objects.all()
+    permission_classes = [permissions.AllowAny]
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -121,6 +127,7 @@ class getPlaces(generics.ListAPIView):
     - search (searches in address and description)
     """
     serializer_class = PlaceSerializer
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         queryset = Place.objects.all()
@@ -160,6 +167,7 @@ class addPlace(generics.CreateAPIView):
     """
     serializer_class = PlaceSerializer
     queryset = Place.objects.all()
+    permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
         """
@@ -188,6 +196,7 @@ class showPlace(generics.RetrieveAPIView):
     serializer_class = PlaceSerializer
     lookup_field = 'user__slug'
     queryset = Place.objects.all()
+    permission_classes = [permissions.AllowAny]
 
     def get_object(self):
         """
@@ -216,6 +225,7 @@ class editPlace(generics.UpdateAPIView):
     serializer_class = PlaceSerializer
     lookup_field = 'user__slug'
     queryset = Place.objects.all()
+    permission_classes = [permissions.AllowAny]
 
     def get_object(self):
         """
@@ -253,6 +263,7 @@ class deletePlace(generics.DestroyAPIView):
     serializer_class = PlaceSerializer
     lookup_field = 'user__slug'
     queryset = Place.objects.all()
+    permission_classes = [permissions.AllowAny]
 
     def get_object(self):
         """
