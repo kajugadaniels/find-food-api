@@ -45,6 +45,21 @@ class Category(models.Model):
 
         super(Category, self).save(*args, **kwargs)
 
+    def generate_unique_slug(self):
+        """
+        Generates a unique slug from the category's name.
+        If the generated slug already exists, appends a numerical suffix to make it unique.
+        """
+        base_slug = slugify(self.name)
+        slug = base_slug
+        counter = 1
+        # Exclude the current instance from the slug uniqueness check if it exists
+        while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug
+
+
 def user_image_path(instance, filename):
     base_filename, file_extension = os.path.splitext(filename)
     return f'profile_images/user_{slugify(instance.slug)}_{instance.phone_number}{file_extension}'
