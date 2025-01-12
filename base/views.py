@@ -16,7 +16,7 @@ class getCategories(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        queryset = Category.objects.all()
+        queryset = Category.objects.all().order_by('-id')
         name = self.request.query_params.get('name')
         if name:
             queryset = queryset.filter(name__icontains=name)

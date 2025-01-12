@@ -27,23 +27,23 @@ class Category(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        # Generate a unique slug if not provided
-        if not self.slug:
-            self.slug = self.generate_unique_slug()
-        super(Category, self).save(*args, **kwargs)
+        """
+        Overrides the save method to automatically update the slug when the category name changes.
+        
+        - On creation, a unique slug is generated from the name.
+        - On update, if the name has changed, the slug is re-generated.
+        """
+        # If this is an update, check if the category name has changed
+        if self.pk:
+            orig = Category.objects.get(pk=self.pk)
+            if orig.name != self.name:
+                self.slug = self.generate_unique_slug()
+        else:
+            # On creation, generate a slug if not provided
+            if not self.slug:
+                self.slug = self.generate_unique_slug()
 
-    def generate_unique_slug(self):
-        """
-        Generates a unique slug from the category's name.
-        If the slug already exists, appends a numerical suffix to make it unique.
-        """
-        base_slug = slugify(self.name)
-        slug = base_slug
-        counter = 1
-        while Category.objects.filter(slug=slug).exists():
-            slug = f"{base_slug}-{counter}"
-            counter += 1
-        return slug
+        super(Category, self).save(*args, **kwargs)
 
 def user_image_path(instance, filename):
     base_filename, file_extension = os.path.splitext(filename)
