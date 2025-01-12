@@ -245,3 +245,27 @@ class editPlace(generics.UpdateAPIView):
             'data': serializer.data
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+class deletePlace(generics.DestroyAPIView):
+    """
+    API view to delete a place identified by the slug of its associated User.
+    """
+    serializer_class = PlaceSerializer
+    lookup_field = 'user__slug'
+    queryset = Place.objects.all()
+
+    def get_object(self):
+        """
+        Retrieve a Place instance based on the associated user's slug.
+        """
+        slug = self.kwargs.get('slug')
+        obj = get_object_or_404(Place, user__slug=slug)
+        return obj
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy method to return a custom success message upon deletion.
+        """
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({'message': 'Place deleted successfully.'}, status=status.HTTP_200_OK)
