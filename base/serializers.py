@@ -1,23 +1,18 @@
 from base.models import *
+from account.models import *
 from rest_framework import serializers
 
 class CategorySerializer(serializers.ModelSerializer):
     """
-    Serializer for the Category model.
+    Serializer for Category model.
     """
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name', 'slug', 'created_at', 'updated_at']
 
-
-class PlaceSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Place model.
-    """
-
-    user_slug = serializers.ReadOnlyField(source='user.slug', read_only=True)
-    user_name = serializers.ReadOnlyField(source='user.name', read_only=True)
-
-    class Meta:
-        model = Place
-        fields = '__all__'
+    def create(self, validated_data):
+        """
+        Create a new Category instance. The model's save method auto-generates a unique slug if not provided.
+        """
+        category = Category.objects.create(**validated_data)
+        return category
