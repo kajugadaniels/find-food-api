@@ -152,3 +152,31 @@ class getPlaces(generics.ListAPIView):
             'data': serializer.data
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+class addPlace(generics.CreateAPIView):
+    """
+    API view to add a new place.
+    The model's save() method handles the creation of an associated User if needed.
+    """
+    serializer_class = PlaceSerializer
+    queryset = Place.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create method to handle errors and return a custom success message on place creation.
+        """
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+        except ValidationError as ve:
+            return Response(
+                {'message': 'Error creating place.', 'errors': ve.detail},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        response_data = {
+            'message': 'Place created successfully.',
+            'data': serializer.data
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
