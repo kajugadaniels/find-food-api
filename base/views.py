@@ -110,3 +110,45 @@ class deleteCategory(generics.DestroyAPIView):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'message': 'Category deleted successfully.'}, status=status.HTTP_200_OK)
+
+class getPlaces(generics.ListAPIView):
+    """
+    API view to list all places.
+    Supports optional filtering by query parameters such as:
+    - province (exact match, case-insensitive)
+    - district (exact match, case-insensitive)
+    - category (using the category's slug)
+    - search (searches in address and description)
+    """
+    serializer_class = PlaceSerializer
+
+    def get_queryset(self):
+        queryset = Place.objects.all()
+        province = self.request.query_params.get('province')
+        district = self.request.query_params.get('district')
+        category = self.request.query_params.get('category')
+        search = self.request.query_params.get('search')
+
+        if province:
+            queryset = queryset.filter(province__iexact=province)
+        if district:
+            queryset = queryset.filter(district__iexact=district)
+        if category:
+            queryset = queryset.filter(category__slug=category)
+        if search:
+            queryset = queryset.filter(
+                Q(address__icontains=search) | Q(description__icontains=search)
+            )
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Override list method to include a custom success message.
+        """
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        response_data = {
+            'message': 'Places retrieved successfully.',
+            'data': serializer.data
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
