@@ -45,3 +45,12 @@ class editCategory(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class deleteCategory(APIView):
+    """
+    View to delete a specific Category by slug.
+    """
+    def delete(self, request, slug, *args, **kwargs):
+        category = get_object_or_404(Category, slug=slug)
+        category.delete()
+        return Response({'detail': 'Category deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
