@@ -42,3 +42,18 @@ class PlaceSerializer(serializers.ModelSerializer):
         """
         place = Place.objects.create(**validated_data)
         return place
+
+    def update(self, instance, validated_data):
+        """
+        Update an existing Place instance with validated data.
+        If the profile_image is updated, the method also updates the associated user's image.
+        """
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Ensure that if profile_image is updated, the associated user's image reflects this change.
+        if 'profile_image' in validated_data and instance.user:
+            instance.user.image = validated_data.get('profile_image')
+            instance.user.save()
+        return instance
