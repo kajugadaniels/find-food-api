@@ -94,3 +94,19 @@ class editCategory(generics.UpdateAPIView):
             'data': serializer.data
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+class deleteCategory(generics.DestroyAPIView):
+    """
+    API view to delete a category identified by its slug.
+    """
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+    queryset = Category.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy method to return a custom success message.
+        """
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({'message': 'Category deleted successfully.'}, status=status.HTTP_200_OK)
