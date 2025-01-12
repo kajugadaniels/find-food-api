@@ -1,56 +1,33 @@
 from base.models import *
 from base.serializers import *
-from rest_framework import status
-from rest_framework.views import APIView
+from django.db.models import Q
+from rest_framework import generics, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import ValidationError
 
-class getCategories(APIView):
+class getCategories(generics.ListAPIView):
     """
-    View to list all categories or filter them if needed in the future.
+    API view to list all categories.
+    Supports optional filtering by passing a query parameter 'name' (case-insensitive partial match).
     """
-    def get(self, request, *args, **kwargs):
-        categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer_class = CategorySerializer
 
-class addCategory(APIView):
-    """
-    View to create a new Category.
-    """
-    def post(self, request, *args, **kwargs):
-        serializer = CategorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        queryset = Category.objects.all()
+        name = self.request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        return queryset
 
-class showCategory(APIView):
-    """
-    View to retrieve a specific Category by slug.
-    """
-    def get(self, request, slug, *args, **kwargs):
-        category = get_object_or_404(Category, slug=slug)
-        serializer = CategorySerializer(category)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-class editCategory(APIView):
-    """
-    View to update a specific Category by slug.
-    """
-    def put(self, request, slug, *args, **kwargs):
-        category = get_object_or_404(Category, slug=slug)
-        serializer = CategorySerializer(category, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class deleteCategory(APIView):
-    """
-    View to delete a specific Category by slug.
-    """
-    def delete(self, request, slug, *args, **kwargs):
-        category = get_object_or_404(Category, slug=slug)
-        category.delete()
-        return Response({'detail': 'Category deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+    def list(self, request, *args, **kwargs):
+        """
+        Override list method to include a custom success message.
+        """
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        response_data = {
+            'message': 'Categories retrieved successfully.',
+            'data': serializer.data
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
