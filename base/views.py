@@ -208,3 +208,40 @@ class showPlace(generics.RetrieveAPIView):
             'data': serializer.data
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+class editPlace(generics.UpdateAPIView):
+    """
+    API view to update an existing place using the slug of the associated User.
+    """
+    serializer_class = PlaceSerializer
+    lookup_field = 'user__slug'
+    queryset = Place.objects.all()
+
+    def get_object(self):
+        """
+        Retrieve a Place instance based on the user's slug.
+        """
+        slug = self.kwargs.get('slug')
+        obj = get_object_or_404(Place, user__slug=slug)
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        """
+        Override update method to handle errors and return a custom success message.
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+        except ValidationError as ve:
+            return Response(
+                {'message': 'Error updating place.', 'errors': ve.detail},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        response_data = {
+            'message': 'Place updated successfully.',
+            'data': serializer.data
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
