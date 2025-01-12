@@ -33,3 +33,15 @@ class showCategory(APIView):
         category = get_object_or_404(Category, slug=slug)
         serializer = CategorySerializer(category)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class editCategory(APIView):
+    """
+    View to update a specific Category by slug.
+    """
+    def put(self, request, slug, *args, **kwargs):
+        category = get_object_or_404(Category, slug=slug)
+        serializer = CategorySerializer(category, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
