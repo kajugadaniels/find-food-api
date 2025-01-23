@@ -19,41 +19,91 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class PlaceSerializer(serializers.ModelSerializer):
     """
-    Serializer for Place model.
-    The 'user_slug' field is a read-only field representing the associated user's slug.
+    Enhanced serializer for the Place model with expanded fields
+    to directly return user and category information.
     """
+
+    # User-related fields
+    user_name = serializers.SerializerMethodField(read_only=True)
+    user_email = serializers.SerializerMethodField(read_only=True)
+    user_phone = serializers.SerializerMethodField(read_only=True)
     user_slug = serializers.SerializerMethodField(read_only=True)
+    user_image = serializers.SerializerMethodField(read_only=True)
+
+    # Category-related fields
+    category_name = serializers.SerializerMethodField(read_only=True)
+    category_slug = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Place
-        fields = '__all__'
-        read_only_fields = ['user', 'created_at', 'updated_at', 'user_slug']
+        fields = [
+            'id',
+            'description',
+            'province',
+            'district',
+            'sector',
+            'cell',
+            'village',
+            'address',
+            'latitude',
+            'longitude',
+            'main_phone_number',
+            'second_phone_number',
+            'email',
+            'instagram',
+            'whatsapp',
+            'tiktok',
+            'facebook',
+            'twitter',
+            'profile_image',
+            'created_at',
+            'updated_at',
+
+            'user_name',
+            'user_email',
+            'user_phone',
+            'user_slug',
+            'user_image',
+
+            'category_name',
+            'category_slug',
+        ]
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+            'user_name',
+            'user_email',
+            'user_phone',
+            'user_slug',
+            'user_image',
+            'category_name',
+            'category_slug',
+        ]
+
+    def get_user_name(self, obj):
+        return obj.user.name if obj.user else None
+
+    def get_user_email(self, obj):
+        return obj.user.email if obj.user else None
+
+    def get_user_phone(self, obj):
+        return obj.user.phone_number if obj.user else None
 
     def get_user_slug(self, obj):
-        """
-        Returns the slug of the associated user.
-        """
         return obj.user.slug if obj.user else None
 
-    def create(self, validated_data):
+    def get_user_image(self, obj):
         """
-        Create a new Place instance.
-        Note: The Place model's save() method handles auto-creation of a User (with role 'Client') if not provided.
+        Return the full URL for the user's image if available,
+        or None if the user/image is absent.
         """
-        place = Place.objects.create(**validated_data)
-        return place
+        if obj.user and obj.user.image:
+            return obj.user.image.url
+        return None
 
-    def update(self, instance, validated_data):
-        """
-        Update an existing Place instance with validated data.
-        If the profile_image is updated, the method also updates the associated user's image.
-        """
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
+    def get_category_name(self, obj):
+        return obj.category.name if obj.category else None
 
-        # Ensure that if profile_image is updated, the associated user's image reflects this change.
-        if 'profile_image' in validated_data and instance.user:
-            instance.user.image = validated_data.get('profile_image')
-            instance.user.save()
-        return instance
+    def get_category_slug(self, obj):
+        return obj.category.slug if obj.category else None
