@@ -37,6 +37,16 @@ class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
         fields = [
+
+            'user_name',
+            'user_email',
+            'user_phone',
+            'user_slug',
+            'user_image',
+
+            'category_name',
+            'category_slug',
+
             'id',
             'description',
             'province',
@@ -58,15 +68,6 @@ class PlaceSerializer(serializers.ModelSerializer):
             'profile_image',
             'created_at',
             'updated_at',
-
-            'user_name',
-            'user_email',
-            'user_phone',
-            'user_slug',
-            'user_image',
-
-            'category_name',
-            'category_slug',
         ]
         read_only_fields = [
             'id',
