@@ -39,14 +39,18 @@ class PlaceSerializer(serializers.ModelSerializer):
         fields = [
             'id',
 
+            # Expanded user info
             'user_name',
             'user_email',
             'user_phone',
             'user_slug',
             'user_image',
 
+            # Expanded category info
             'category_name',
             'category_slug',
+
+            # Core Place fields
             'description',
             'province',
             'district',
@@ -81,6 +85,9 @@ class PlaceSerializer(serializers.ModelSerializer):
             'category_slug',
         ]
 
+    # ----------------
+    # USER FIELD METHODS
+    # ----------------
     def get_user_name(self, obj):
         return obj.user.name if obj.user else None
 
@@ -95,15 +102,38 @@ class PlaceSerializer(serializers.ModelSerializer):
 
     def get_user_image(self, obj):
         """
-        Return the full URL for the user's image if available,
-        or None if the user/image is absent.
+        Return the relative URL for the user's image if available, or None otherwise.
+        We'll convert it to an absolute URL in `to_representation`.
         """
         if obj.user and obj.user.image:
-            return obj.user.image.url
+            return obj.user.image.url  # <-- Relative URL by default
         return None
 
+    # ----------------
+    # CATEGORY FIELD METHODS
+    # ----------------
     def get_category_name(self, obj):
         return obj.category.name if obj.category else None
 
     def get_category_slug(self, obj):
         return obj.category.slug if obj.category else None
+
+    # ----------------
+    # OVERRIDE TO_RETURN ABSOLUTE URLS
+    # ----------------
+    def to_representation(self, instance):
+        """
+        Convert the image fields to absolute URLs if request is in context.
+        """
+        representation = super().to_representation(instance)
+        request = self.context.get('request', None)
+
+        if request:
+            # Convert user_image to absolute
+            if representation.get('user_image'):
+                representation['user_image'] = request.build_absolute_uri(representation['user_image'])
+            # Convert profile_image to absolute
+            if representation.get('profile_image'):
+                representation['profile_image'] = request.build_absolute_uri(representation['profile_image'])
+
+        return representation
