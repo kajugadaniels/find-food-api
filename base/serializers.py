@@ -37,6 +37,7 @@ class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
         fields = [
+            'id',
 
             'user_name',
             'user_email',
@@ -46,8 +47,6 @@ class PlaceSerializer(serializers.ModelSerializer):
 
             'category_name',
             'category_slug',
-
-            'id',
             'description',
             'province',
             'district',
