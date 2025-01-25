@@ -59,7 +59,6 @@ class Category(models.Model):
             counter += 1
         return slug
 
-
 def user_image_path(instance, filename):
     base_filename, file_extension = os.path.splitext(filename)
     return f'profile_images/user_{slugify(instance.slug)}_{instance.phone_number}{file_extension}'
@@ -114,7 +113,6 @@ class Place(models.Model):
         super().clean()
         if not self.user and not self.email:
             raise ValidationError(_('Email is required if no user is associated.'))
-        # Additional custom validations can be added here.
 
     def save(self, *args, **kwargs):
         """
